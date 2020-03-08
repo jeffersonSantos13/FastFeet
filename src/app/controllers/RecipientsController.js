@@ -4,12 +4,13 @@ import cep from 'cep-promise';
 import Recipients from '../models/Recipients';
 
 class RecipientsController {
-  // Inserir usuário
   async store(req, res) {
     const schema = Yup.object().shape({
       nome: Yup.string().required(),
       rua: Yup.string().required(),
-      numero: Yup.number().required().min(1),
+      numero: Yup.number()
+        .required()
+        .min(1),
       complemento: Yup.string().required(),
       estado: Yup.string().required(),
       cidade: Yup.string().required(),
@@ -18,23 +19,21 @@ class RecipientsController {
 
     // Valida se todas as informações do destinatários foram informados
     if (!(await schema.isValid(req.body))) {
-      return res.status(401).json({ error: "Validation fails" });
+      return res.status(400).json({ error: 'Validation fails' });
     }
 
     // Verifica se o CEP informado é válido
     try {
       await cep(req.body.cep);
-    } catch(err) {
-      return res.status(401).json({ error: "CEP informado não encontrado" });
+    } catch (err) {
+      return res.status(400).json({ error: 'CEP informado não encontrado' });
     }
 
-    // Inserindo destinatário
     const recipient = await Recipients.create(req.body);
 
     return res.json(recipient);
-  };
+  }
 
-  // Atualizando informações do destinatário
   async update(req, res) {
     const schema = Yup.object().shape({
       id: Yup.number().required(),
@@ -49,26 +48,34 @@ class RecipientsController {
 
     // Valida se todas as informações do destinatários foram informados
     if (!(await schema.isValid(req.body))) {
-      return res.status(401).json({ error: "Validation fails" });
+      return res.status(400).json({ error: 'Validation fails' });
     }
 
     const recipient = await Recipients.findByPk(req.body.id);
 
     if (!recipient) {
-      return res.status(401).json({ error: "Recipient does not exists" });
+      return res.status(400).json({ error: 'Recipient does not exists' });
     }
 
     // Verifica se o CEP informado é válido
-    if(req.body.cep){
+    if (req.body.cep) {
       try {
         await cep(req.body.cep);
-      } catch(err) {
-        return res.status(401).json({ error: "CEP informado não encontrado" });
+      } catch (err) {
+        return res.status(400).json({ error: 'CEP informado não encontrado' });
       }
     }
 
     // Atualizando destinatário
-    const { id, nome, rua, numero, complemento, estado, cidade } = await recipient.update(req.body);
+    const {
+      id,
+      nome,
+      rua,
+      numero,
+      complemento,
+      estado,
+      cidade,
+    } = await recipient.update(req.body);
 
     return res.json({
       id,
@@ -78,9 +85,9 @@ class RecipientsController {
       complemento,
       estado,
       cidade,
-      cep: req.body.cep
+      cep: req.body.cep,
     });
-  };
+  }
 }
 
 export default new RecipientsController();
