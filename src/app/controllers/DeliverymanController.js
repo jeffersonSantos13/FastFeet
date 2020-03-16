@@ -1,11 +1,11 @@
 import * as Yup from 'yup';
 
-import Deliverymans from '../models/Deliverymans';
+import Deliveryman from '../models/Deliveryman';
 import File from '../models/File';
 
 class DeliverymanController {
   async index(req, res) {
-    const deliveryman = await Deliverymans.findAll({
+    const deliveryman = await Deliveryman.findAll({
       order: ['id'],
       attributes: ['id', 'name', 'email'],
       include: [
@@ -36,14 +36,14 @@ class DeliverymanController {
     /**
      * Verify if deliveryman e-mail is exists
      */
-    const deliverymanExists = await Deliverymans.findOne({
+    const deliverymanExists = await Deliveryman.findOne({
       where: {
         email: req.body.email,
       },
     });
 
     if (deliverymanExists) {
-      return res.status(400).json({ error: 'Deliveryman is exists' });
+      return res.status(400).json({ error: 'Email already in use' });
     }
 
     /**
@@ -61,13 +61,13 @@ class DeliverymanController {
       }
     }
 
-    const deliveryman = await Deliverymans.create(req.body);
+    const deliveryman = await Deliveryman.create(req.body);
 
     return res.json(deliveryman);
   }
 
   async update(req, res) {
-    const deliveryman = await Deliverymans.findByPk(req.params.id);
+    const deliveryman = await Deliveryman.findByPk(req.params.id);
 
     if (!deliveryman) {
       return res.status(400).json({ error: "Deliveryman does't exists" });
@@ -89,12 +89,12 @@ class DeliverymanController {
      * Verify deliveryman is exists
      */
     if (email && email !== deliveryman.email) {
-      const deliverymanExists = await Deliverymans.findOne({
+      const deliverymanExists = await Deliveryman.findOne({
         where: { email },
       });
 
       if (deliverymanExists) {
-        return res.status(400).json({ error: 'Deliveryman already exists.' });
+        return res.status(400).json({ error: 'Email already in use' });
       }
     }
 
@@ -125,7 +125,7 @@ class DeliverymanController {
   }
 
   async delete(req, res) {
-    const deliveryman = await Deliverymans.findByPk(req.params.id);
+    const deliveryman = await Deliveryman.findByPk(req.params.id);
 
     if (!deliveryman) {
       return res.status(400).json({ error: "Deliveryman does't exists" });
